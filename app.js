@@ -353,27 +353,9 @@ async function shareLog() {
   } catch (e) { /* el usuario canceló */ }
 }
 
-// Comparte el archivo JSON: en Android permite "Guardar en Drive",
-// mandarlo por correo, etc.
-async function shareJson() {
-  const file = new File([buildLogJson(match)], logFileName(), { type: 'application/json' });
-  try {
-    await navigator.share({ files: [file], title: logFileName() });
-  } catch (e) { /* el usuario canceló */ }
-}
-
-function canShareFiles() {
-  try {
-    return !!(navigator.canShare &&
-      navigator.canShare({ files: [new File(['x'], 'x.json', { type: 'application/json' })] }));
-  } catch (e) { return false; }
-}
-
 $('#btnSaveLog').addEventListener('click', downloadLog);
 $('#btnShareLog').addEventListener('click', shareLog);
-$('#btnShareJson').addEventListener('click', shareJson);
 if (navigator.share) $('#btnShareLog').classList.remove('hidden');
-if (canShareFiles()) $('#btnShareJson').classList.remove('hidden');
 
 /* ---------- Banner ---------- */
 let bannerTo = null;
