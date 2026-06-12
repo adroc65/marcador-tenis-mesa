@@ -41,6 +41,10 @@ $('#btnStart').addEventListener('click', () => {
   showGame();
 });
 
+// La pantalla de configuración gira libre (se ve mejor en vertical);
+// el bloqueo horizontal solo aplica durante el partido.
+try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) { /* no soportado */ }
+
 (function checkSaved() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(STORE)); } catch (e) { /* ignorar */ }
@@ -237,6 +241,67 @@ function openLog() {
   });
   $('#logModal').classList.remove('hidden');
 }
+
+/* ---------- Guardar / compartir el log ---------- */
+function buildLogText(m) {
+  const pad = n => String(n).padStart(2, '0');
+  const d = new Date(m.matchStart);
+  const L = [];
+  L.push('MARCADOR · TENIS DE MESA');
+  L.push(`Partido: ${m.config.nameA} vs ${m.config.nameB}`);
+  L.push(`Fecha: ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`);
+  L.push(`Formato: ${m.config.bestOf === 5 ? '3 de 5' : '2 de 3'} sets · Saca primero: ${name(m.config.firstServer)}`);
+  const wa = m.sets.filter(s => s.winner === 'A').length;
+  const wb = m.sets.filter(s => s.winner === 'B').length;
+  const setsStr = m.sets.map(s => `${s.a}-${s.b}`).join(', ');
+  if (m.finished) {
+    const dur = m.log.length ? Math.round((m.log[m.log.length - 1].t - m.matchStart) / 60000) : 0;
+    const wWon = m.winner === 'A' ? wa : wb;
+    const wLost = m.winner === 'A' ? wb : wa;
+    L.push(`Resultado: ${name(m.winner)} gana ${wWon}-${wLost} (${setsStr})`);
+    L.push(`Duración: ${Math.max(1, dur)} min`);
+  } else {
+    L.push(`Partido en curso · Sets: ${wa}-${wb}${setsStr ? ' (' + setsStr + ')' : ''} · Set actual: ${m.scoreA}-${m.scoreB}`);
+  }
+  let curSet = 0;
+  m.log.forEach(e => {
+    if (e.set !== curSet) {
+      curSet = e.set;
+      const fin = m.sets[curSet - 1];
+      L.push('');
+      L.push(fin
+        ? `SET ${curSet} — ${fin.a}-${fin.b}, ${Math.max(1, Math.round(fin.ms / 60000))} min`
+        : `SET ${curSet} — en curso`);
+    }
+    L.push(`${fmtTime(e.t)}  ${e.a}-${e.b}  punto para ${name(e.who)} (sacaba ${name(e.server)})`);
+  });
+  return L.join('\r\n');
+}
+
+function downloadLog() {
+  const pad = n => String(n).padStart(2, '0');
+  const d = new Date(match.matchStart);
+  const fname = `partido-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.txt`;
+  const blob = new Blob([buildLogText(match)], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+async function shareLog() {
+  try {
+    await navigator.share({ title: 'Partido de tenis de mesa', text: buildLogText(match) });
+  } catch (e) { /* el usuario canceló */ }
+}
+
+$('#btnSaveLog').addEventListener('click', downloadLog);
+$('#btnShareLog').addEventListener('click', shareLog);
+if (navigator.share) $('#btnShareLog').classList.remove('hidden');
 
 /* ---------- Banner ---------- */
 let bannerTo = null;

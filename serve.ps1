@@ -25,7 +25,12 @@ try {
 } catch {
   $listener = New-Object System.Net.HttpListener
   $listener.Prefixes.Add("http://localhost:$Port/")
-  $listener.Start()
+  try {
+    $listener.Start()
+  } catch {
+    Write-Host "ERROR: no se pudo usar el puerto $Port. ¿Ya hay otro servidor corriendo? Ciérralo o usa otro puerto: .\serve.ps1 8201"
+    exit 1
+  }
 }
 
 Write-Host "Sirviendo $root en http://localhost:$Port/  (Ctrl+C para detener)"
@@ -36,22 +41,30 @@ while ($listener.IsListening) {
   $async = $listener.GetContextAsync()
   while (-not $async.AsyncWaitHandle.WaitOne(250)) { }
   $ctx = $async.GetAwaiter().GetResult()
-  $path = [Uri]::UnescapeDataString($ctx.Request.Url.AbsolutePath)
-  if ($path -eq '/') { $path = '/index.html' }
-  $file = Join-Path $root ($path -replace '/', '\')
-  $resolved = $null
-  try { $resolved = (Resolve-Path $file -ErrorAction Stop).Path } catch {}
-  if ($resolved -and $resolved.StartsWith($root) -and (Test-Path $resolved -PathType Leaf)) {
-    $bytes = [IO.File]::ReadAllBytes($resolved)
-    $ext = [IO.Path]::GetExtension($resolved).ToLower()
-    if ($mime.ContainsKey($ext)) { $ctx.Response.ContentType = $mime[$ext] }
-    $ctx.Response.Headers.Add('Cache-Control', 'no-cache')
-    $ctx.Response.ContentLength64 = $bytes.Length
-    $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
-  } else {
-    $ctx.Response.StatusCode = 404
+  # Un error atendiendo una petición no debe tumbar el servidor
+  try {
+    $path = [Uri]::UnescapeDataString($ctx.Request.Url.AbsolutePath)
+    if ($path -eq '/') { $path = '/index.html' }
+    $file = Join-Path $root ($path -replace '/', '\')
+    $resolved = $null
+    try { $resolved = (Resolve-Path $file -ErrorAction Stop).Path } catch {}
+    if ($resolved -and $resolved.StartsWith($root) -and (Test-Path $resolved -PathType Leaf)) {
+      $bytes = [IO.File]::ReadAllBytes($resolved)
+      $ext = [IO.Path]::GetExtension($resolved).ToLower()
+      if ($mime.ContainsKey($ext)) { $ctx.Response.ContentType = $mime[$ext] }
+      $ctx.Response.Headers.Add('Cache-Control', 'no-cache')
+      $ctx.Response.ContentLength64 = $bytes.Length
+      # Las peticiones HEAD solo piden encabezados, sin contenido
+      if ($ctx.Request.HttpMethod -ne 'HEAD') {
+        $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
+      }
+    } else {
+      $ctx.Response.StatusCode = 404
+    }
+    $ctx.Response.Close()
+  } catch {
+    try { $ctx.Response.Close() } catch {}
   }
-  $ctx.Response.Close()
 }
 } finally {
   $listener.Stop()
