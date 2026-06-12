@@ -1,0 +1,132 @@
+:root {
+  --bg: #0b1220;
+  --card: rgba(20, 30, 48, 0.85);
+  --line: #2a3a55;
+  --text: #e8eef7;
+  --muted: #8fa3bf;
+  --blue: #1d4ed8;
+  --orange: #f97316;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.hidden { display: none !important; }
+.screen { height: 100dvh; width: 100vw; }
+
+/* ---------- Configuración ---------- */
+#setup {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px; padding: 20px; overflow: auto;
+}
+#setup h1 { font-size: clamp(20px, 4vmin, 32px); margin: 0; }
+.form { display: flex; flex-direction: column; gap: 14px; width: min(440px, 92vw); }
+.form label, .field { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
+.form input {
+  background: #0f1a2e; border: 1px solid var(--line); border-radius: 10px;
+  color: var(--text); font-size: 18px; padding: 10px 12px;
+}
+.seg { display: flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button {
+  flex: 1; background: transparent; border: none; color: var(--muted);
+  font-size: 15px; padding: 12px 8px; cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.seg button.on { background: var(--blue); color: #fff; font-weight: 600; }
+button.primary {
+  background: var(--orange); border: none; border-radius: 12px;
+  color: #1a1206; font-size: 18px; font-weight: 700; padding: 14px; cursor: pointer;
+}
+button.ghost {
+  background: transparent; border: 1px solid var(--line); border-radius: 12px;
+  color: var(--text); font-size: 15px; padding: 10px; cursor: pointer;
+}
+
+/* ---------- Juego ---------- */
+#game { display: flex; position: relative; }
+.half {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 1vmin;
+  cursor: pointer; position: relative;
+}
+.half.pA { background: radial-gradient(120% 120% at 30% 20%, #11264d 0%, var(--bg) 70%); }
+.half.pB { background: radial-gradient(120% 120% at 70% 20%, #3d1320 0%, var(--bg) 70%); }
+.pname {
+  font-size: clamp(16px, 4vmin, 34px); display: flex;
+  align-items: center; gap: 10px; z-index: 2;
+}
+.pname .nm { padding: 4px 8px; border-radius: 8px; }
+.serve {
+  font-size: 0.6em; background: var(--orange); color: #1a1206;
+  padding: 3px 12px; border-radius: 999px; font-weight: 700; white-space: nowrap;
+}
+.pscore { font-size: min(36vh, 24vw); font-weight: 800; line-height: 1; }
+.half:active .pscore { transform: scale(1.05); transition: transform 0.05s; }
+.hint { font-size: 12px; color: var(--muted); opacity: 0.6; }
+
+#center {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; min-width: 160px; max-width: 40vw;
+  backdrop-filter: blur(6px); z-index: 10;
+}
+#setPills { font-size: clamp(20px, 5vmin, 32px); font-weight: 800; }
+#pastSets {
+  display: grid; grid-template-columns: auto auto auto;
+  gap: 2px 12px; font-size: 13px; color: var(--muted); text-align: center;
+}
+#pastSets .hd { font-weight: 600; max-width: 9ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#pastSets .w { color: var(--text); font-weight: 700; }
+#timer, #estimate { font-size: 13px; color: var(--muted); }
+.cbtns { display: flex; gap: 8px; }
+.cbtns button {
+  background: #0f1a2e; border: 1px solid var(--line); border-radius: 10px;
+  color: var(--text); font-size: 18px; padding: 8px 14px; cursor: pointer;
+}
+
+#banner {
+  position: absolute; bottom: 5vh; left: 50%; transform: translateX(-50%);
+  background: var(--orange); color: #1a1206; font-weight: 700;
+  padding: 12px 22px; border-radius: 999px; font-size: 17px;
+  z-index: 30; white-space: nowrap;
+}
+
+/* ---------- Overlays ---------- */
+#overlay, #logModal {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65);
+  display: flex; align-items: center; justify-content: center; z-index: 40;
+}
+.modal {
+  background: #101a2c; border: 1px solid var(--line); border-radius: 16px;
+  padding: 24px; display: flex; flex-direction: column; gap: 12px;
+  align-items: center; max-width: 92vw; max-height: 88dvh; overflow: auto;
+}
+.modal h2 { margin: 0; font-size: clamp(18px, 4vmin, 28px); text-align: center; }
+.modal .muted { color: var(--muted); margin: 0; text-align: center; }
+.modal .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+#logList { display: flex; flex-direction: column; gap: 4px; font-size: 14px; min-width: min(420px, 80vw); }
+.loghead { color: var(--orange); font-weight: 700; margin-top: 10px; }
+.logrow { display: flex; justify-content: space-between; gap: 14px; color: var(--muted); }
+.logrow b { color: var(--text); }
+.logrow .tm { font-variant-numeric: tabular-nums; }
+
+/* El marcador siempre es izquierda/derecha, como los lados de la mesa.
+   Si el dispositivo quedara en vertical, solo se compactan los tamaños. */
+@media (orientation: portrait) {
+  .pscore { font-size: min(30vh, 32vw); }
+  #center {
+    max-width: 60vw; padding: 8px 10px;
+    top: 6vh; transform: translateX(-50%);
+  }
+}

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Marcador · Tenis de Mesa</title>
+<meta name="theme-color" content="#0b1220">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Pantalla de configuración -->
+<section id="setup" class="screen">
+  <h1>🏓 Marcador · Tenis de Mesa</h1>
+  <div class="form">
+    <label>Jugador A <input id="inpA" value="Jugador A" maxlength="20"></label>
+    <label>Jugador B <input id="inpB" value="Jugador B" maxlength="20"></label>
+    <div class="field"><span>Saca primero</span>
+      <div class="seg" id="segServer">
+        <button data-v="A" class="on">Jugador A</button><button data-v="B">Jugador B</button>
+      </div>
+    </div>
+    <div class="field"><span>Partido a</span>
+      <div class="seg" id="segBestOf">
+        <button data-v="3" class="on">2 de 3 sets</button><button data-v="5">3 de 5 sets</button>
+      </div>
+    </div>
+    <div class="field"><span>Cambio de lado a los 5 puntos en el set decisivo</span>
+      <div class="seg" id="segSwap">
+        <button data-v="no" class="on">No</button><button data-v="si">Sí</button>
+      </div>
+    </div>
+    <button id="btnStart" class="primary">Iniciar partido</button>
+    <button id="btnResume" class="ghost hidden">Continuar partido anterior</button>
+  </div>
+</section>
+
+<!-- Pantalla de juego -->
+<section id="game" class="screen hidden">
+  <div class="half" id="halfL">
+    <div class="pname"><span class="nm"></span><span class="serve hidden">🏓 saca</span></div>
+    <div class="pscore">0</div>
+    <div class="hint">toca para sumar</div>
+  </div>
+  <div class="half" id="halfR">
+    <div class="pname"><span class="nm"></span><span class="serve hidden">🏓 saca</span></div>
+    <div class="pscore">0</div>
+    <div class="hint">toca para sumar</div>
+  </div>
+
+  <div id="center">
+    <div id="setPills">0 – 0</div>
+    <div id="pastSets"></div>
+    <div id="timer"></div>
+    <div id="estimate"></div>
+    <div class="cbtns">
+      <button id="btnUndo" title="Deshacer último punto">↩</button>
+      <button id="btnLog" title="Log de puntos">📋</button>
+      <button id="btnMenu" title="Nuevo partido">✕</button>
+    </div>
+  </div>
+
+  <div id="banner" class="hidden"></div>
+</section>
+
+<!-- Overlay de fin de set / fin de partido -->
+<div id="overlay" class="hidden"></div>
+
+<!-- Modal de log -->
+<div id="logModal" class="hidden">
+  <div class="modal">
+    <h2>📋 Log de puntos</h2>
+    <div id="logList"></div>
+    <button id="btnCloseLog" class="ghost">Cerrar</button>
+  </div>
+</div>
+
+<script src="logic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
