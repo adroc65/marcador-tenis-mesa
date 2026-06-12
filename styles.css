@@ -71,7 +71,14 @@ button.ghost {
 }
 .pscore { font-size: min(36vh, 24vw); font-weight: 800; line-height: 1; }
 .half:active .pscore { transform: scale(1.05); transition: transform 0.05s; }
-.hint { font-size: 12px; color: var(--muted); opacity: 0.6; }
+.errbtns { display: flex; gap: 14px; margin-top: 1vmin; }
+.errbtns button {
+  background: rgba(15, 26, 46, 0.6); border: 1px solid var(--line);
+  border-radius: 10px; color: var(--muted); cursor: pointer;
+  font-size: clamp(13px, 2.2vmin, 18px); font-weight: 700;
+  padding: 6px 16px; min-width: 56px;
+}
+.errbtns button:active { background: #3d1320; color: var(--text); }
 
 #center {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);

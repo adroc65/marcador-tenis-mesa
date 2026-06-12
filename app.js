@@ -94,6 +94,20 @@ function tap(el) {
   render();
 }
 
+// Botones −S / −A: el jugador de ese lado PIERDE el punto por fallo
+// de saque o de ataque; el punto se le suma al rival y queda en el log.
+document.querySelectorAll('.errbtns button').forEach(b => {
+  b.addEventListener('click', ev => {
+    ev.stopPropagation();
+    if (!match || match.finished || match.betweenSets) return;
+    const p = b.closest('.half').dataset.player; // quien falló
+    const err = b.classList.contains('errS') ? 'S' : 'A';
+    const evs = Engine.addPoint(match, Engine.other(p), err);
+    evs.forEach(e => { if (e.type === 'swap') showBanner('🔄 Cambio de lado'); });
+    render();
+  });
+});
+
 document.querySelectorAll('.half .nm').forEach(el => {
   el.addEventListener('click', ev => {
     ev.stopPropagation();
@@ -233,10 +247,11 @@ function openLog() {
     }
     const r = document.createElement('div');
     r.className = 'logrow';
+    const extra = e.err ? ` · −${e.err} ${esc(name(Engine.other(e.who)))}` : '';
     r.innerHTML = `<span class="tm">${fmtTime(e.t)}</span>` +
       `<b>${esc(name(e.who))}</b>` +
       `<span>${e.a}–${e.b}</span>` +
-      `<span>sacaba ${esc(name(e.server))}</span>`;
+      `<span>sacaba ${esc(name(e.server))}${extra}</span>`;
     wrap.appendChild(r);
   });
   $('#logModal').classList.remove('hidden');
@@ -273,7 +288,8 @@ function buildLogText(m) {
         ? `SET ${curSet} — ${fin.a}-${fin.b}, ${Math.max(1, Math.round(fin.ms / 60000))} min`
         : `SET ${curSet} — en curso`);
     }
-    L.push(`${fmtTime(e.t)}  ${e.a}-${e.b}  punto para ${name(e.who)} (sacaba ${name(e.server)})`);
+    const extra = e.err ? ` [${e.err === 'S' ? 'saque' : 'ataque'} fallado por ${name(Engine.other(e.who))}]` : '';
+    L.push(`${fmtTime(e.t)}  ${e.a}-${e.b}  punto para ${name(e.who)} (sacaba ${name(e.server)})${extra}`);
   });
   return L.join('\r\n');
 }
@@ -302,14 +318,19 @@ function buildLogJson(m) {
     puntos: m.log.map(e => ({
       hora: iso(e.t), set: e.set, punto: e.who, sacaba: e.server,
       A: e.a, B: e.b,
+      error: e.err === 'S' ? 'saque' : e.err === 'A' ? 'ataque' : null,
     })),
   }, null, 2);
 }
 
-function downloadLog() {
+function logFileName() {
   const pad = n => String(n).padStart(2, '0');
   const d = new Date(match.matchStart);
-  const fname = `partido-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+  return `partido-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+}
+
+function downloadLog() {
+  const fname = logFileName();
   const blob = new Blob([buildLogJson(match)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -327,9 +348,27 @@ async function shareLog() {
   } catch (e) { /* el usuario canceló */ }
 }
 
+// Comparte el archivo JSON: en Android permite "Guardar en Drive",
+// mandarlo por correo, etc.
+async function shareJson() {
+  const file = new File([buildLogJson(match)], logFileName(), { type: 'application/json' });
+  try {
+    await navigator.share({ files: [file], title: logFileName() });
+  } catch (e) { /* el usuario canceló */ }
+}
+
+function canShareFiles() {
+  try {
+    return !!(navigator.canShare &&
+      navigator.canShare({ files: [new File(['x'], 'x.json', { type: 'application/json' })] }));
+  } catch (e) { return false; }
+}
+
 $('#btnSaveLog').addEventListener('click', downloadLog);
 $('#btnShareLog').addEventListener('click', shareLog);
+$('#btnShareJson').addEventListener('click', shareJson);
 if (navigator.share) $('#btnShareLog').classList.remove('hidden');
+if (canShareFiles()) $('#btnShareJson').classList.remove('hidden');
 
 /* ---------- Banner ---------- */
 let bannerTo = null;

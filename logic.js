@@ -54,21 +54,25 @@ const Engine = (() => {
     return JSON.stringify(rest);
   }
 
-  function addPoint(m, who) {
+  // who: quién gana el punto. err (opcional): 'S' o 'A' si el punto se
+  // ganó por un fallo del rival (saque o ataque fallado).
+  function addPoint(m, who, err) {
     if (m.finished || m.betweenSets) return [];
     m.undoStack.push(snapshot(m));
     if (m.undoStack.length > 300) m.undoStack.shift();
 
     const server = currentServer(m);
     if (who === 'A') m.scoreA++; else m.scoreB++;
-    m.log.push({
+    const entry = {
       t: Date.now(),
       set: setIndex(m) + 1,
       who,
       server,
       a: m.scoreA,
       b: m.scoreB,
-    });
+    };
+    if (err) entry.err = err;
+    m.log.push(entry);
 
     const events = [];
     const a = m.scoreA, b = m.scoreB;

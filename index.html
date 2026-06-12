@@ -43,12 +43,18 @@
   <div class="half" id="halfL">
     <div class="pname"><span class="nm"></span><span class="serve hidden">🏓 saca</span></div>
     <div class="pscore">0</div>
-    <div class="hint">toca para sumar</div>
+    <div class="errbtns">
+      <button class="errS" title="Perdió el punto por fallo de saque">−S</button>
+      <button class="errA" title="Perdió el punto por ataque fallado">−A</button>
+    </div>
   </div>
   <div class="half" id="halfR">
     <div class="pname"><span class="nm"></span><span class="serve hidden">🏓 saca</span></div>
     <div class="pscore">0</div>
-    <div class="hint">toca para sumar</div>
+    <div class="errbtns">
+      <button class="errS" title="Perdió el punto por fallo de saque">−S</button>
+      <button class="errA" title="Perdió el punto por ataque fallado">−A</button>
+    </div>
   </div>
 
   <div id="center">
@@ -76,7 +82,8 @@
     <div id="logList"></div>
     <div class="row">
       <button id="btnSaveLog" class="ghost">💾 Guardar</button>
-      <button id="btnShareLog" class="ghost hidden">📤 Compartir</button>
+      <button id="btnShareJson" class="ghost hidden">☁️ JSON</button>
+      <button id="btnShareLog" class="ghost hidden">📤 Resumen</button>
       <button id="btnCloseLog" class="ghost">Cerrar</button>
     </div>
   </div>
