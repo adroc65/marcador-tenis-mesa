@@ -11,6 +11,7 @@ const Engine = (() => {
         nameB: (cfg.nameB || '').trim() || 'Jugador B',
         bestOf: cfg.bestOf === 5 ? 5 : 3,
         firstServer: cfg.firstServer === 'B' ? 'B' : 'A',
+        leftFirst: cfg.leftFirst === 'B' ? 'B' : 'A',
         swapAt5: !!cfg.swapAt5,
       },
       sets: [],            // sets terminados: {a, b, winner, ms}
@@ -45,8 +46,12 @@ const Engine = (() => {
 
   // Los jugadores cambian de lado en cada set; en el decisivo,
   // adicionalmente al llegar alguien a 5 (si está activada la opción).
+  // true = el jugador B se muestra a la izquierda de la pantalla.
+  // leftFirst define quién arranca a la izquierda (la pantalla refleja
+  // la posición real de los jugadores en la mesa).
   function sidesSwapped(m) {
-    return (setIndex(m) % 2 === 1) !== m.deciderSwapDone;
+    const relativo = (setIndex(m) % 2 === 1) !== m.deciderSwapDone;
+    return relativo !== (m.config.leftFirst === 'B');
   }
 
   function snapshot(m) {

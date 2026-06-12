@@ -19,12 +19,16 @@ function initSeg(root) {
   }));
 }
 const segVal = root => root.querySelector('button.on').dataset.v;
-initSeg($('#segServer')); initSeg($('#segBestOf')); initSeg($('#segSwap'));
+initSeg($('#segServer')); initSeg($('#segLeft')); initSeg($('#segBestOf')); initSeg($('#segSwap'));
 
 function syncServerLabels() {
-  const btns = $('#segServer').querySelectorAll('button');
-  btns[0].textContent = $('#inpA').value.trim() || 'Jugador A';
-  btns[1].textContent = $('#inpB').value.trim() || 'Jugador B';
+  const nA = $('#inpA').value.trim() || 'Jugador A';
+  const nB = $('#inpB').value.trim() || 'Jugador B';
+  [$('#segServer'), $('#segLeft')].forEach(seg => {
+    const btns = seg.querySelectorAll('button');
+    btns[0].textContent = nA;
+    btns[1].textContent = nB;
+  });
 }
 $('#inpA').addEventListener('input', syncServerLabels);
 $('#inpB').addEventListener('input', syncServerLabels);
@@ -35,6 +39,7 @@ $('#btnStart').addEventListener('click', () => {
     nameB: $('#inpB').value,
     bestOf: parseInt(segVal($('#segBestOf')), 10),
     firstServer: segVal($('#segServer')),
+    leftFirst: segVal($('#segLeft')),
     swapAt5: segVal($('#segSwap')) === 'si',
   });
   save();

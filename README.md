@@ -9,6 +9,9 @@ y, una vez publicado con https, se puede instalar como app y usar 100% offline.
   tocando el nombre durante el partido.
 - Se elige quién saca primero. El saque cambia cada 2 puntos (cada punto a
   partir de 10-10) y el sacador inicial alterna en cada set.
+- Se elige quién inicia a la izquierda de la pantalla, para que el marcador
+  de cada jugador quede del lado de la mesa donde está parado (la pantalla
+  se coloca viendo hacia los jugadores).
 - Set a 11 puntos con diferencia de 2. Partido a 2 de 3 sets (default) o 3 de 5.
 - Opción de cambio de lado al llegar a 5 puntos en el set decisivo (default: no).
   Los lados en pantalla se intercambian igual que los jugadores en la mesa.
