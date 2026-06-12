@@ -13,7 +13,9 @@ y, una vez publicado con https, se puede instalar como app y usar 100% offline.
 - Opción de cambio de lado al llegar a 5 puntos en el set decisivo (default: no).
   Los lados en pantalla se intercambian igual que los jugadores en la mesa.
 - Cuadrito central con los marcadores de los sets pasados y sets ganados.
-- Log de todos los puntos (hora, quién anotó, marcador, quién sacaba).
+- Log de todos los puntos (hora, quién anotó, marcador, quién sacaba),
+  exportable: 💾 descarga un `.json` por partido (pensado para analizar
+  estadísticas con Python) y 📤 comparte el resumen legible.
 - Cronómetro del set y duración estimada según el ritmo de puntos.
 - Botón deshacer (funciona incluso si el punto cerró un set o el partido).
 - El partido se guarda solo: si se cierra la app, se puede continuar.

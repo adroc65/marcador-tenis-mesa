@@ -278,11 +278,39 @@ function buildLogText(m) {
   return L.join('\r\n');
 }
 
+// Exportación estructurada: un archivo por partido, pensado para
+// analizar después varios partidos con Python/pandas en la PC.
+function buildLogJson(m) {
+  const iso = t => new Date(t).toISOString();
+  return JSON.stringify({
+    app: 'marcador-tenis-mesa',
+    version: 1,
+    inicio: iso(m.matchStart),
+    jugadores: { A: m.config.nameA, B: m.config.nameB },
+    formato: {
+      mejorDe: m.config.bestOf,
+      sacaPrimero: m.config.firstServer,
+      cambioDeLadoALos5: m.config.swapAt5,
+    },
+    terminado: m.finished,
+    ganador: m.winner,
+    sets: m.sets.map((s, i) => ({
+      set: i + 1, A: s.a, B: s.b, ganador: s.winner,
+      duracionSeg: Math.round(s.ms / 1000),
+    })),
+    setActual: m.finished ? null : { A: m.scoreA, B: m.scoreB },
+    puntos: m.log.map(e => ({
+      hora: iso(e.t), set: e.set, punto: e.who, sacaba: e.server,
+      A: e.a, B: e.b,
+    })),
+  }, null, 2);
+}
+
 function downloadLog() {
   const pad = n => String(n).padStart(2, '0');
   const d = new Date(match.matchStart);
-  const fname = `partido-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.txt`;
-  const blob = new Blob([buildLogText(match)], { type: 'text/plain;charset=utf-8' });
+  const fname = `partido-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+  const blob = new Blob([buildLogJson(match)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
