@@ -59,9 +59,12 @@ const Engine = (() => {
     return JSON.stringify(rest);
   }
 
-  // who: quién gana el punto. err (opcional): 'S' o 'A' si el punto se
-  // ganó por un fallo del rival (saque o ataque fallado).
-  function addPoint(m, who, err) {
+  // who: quién gana el punto. kind (opcional) describe la jugada:
+  //   'ace'       saque ganador directo de who
+  //   'winner'    ataque ganador de who sin respuesta
+  //   'serveErr'  who gana porque el rival falló su saque
+  //   'attackErr' who gana porque el rival falló su ataque
+  function addPoint(m, who, kind) {
     if (m.finished || m.betweenSets) return [];
     m.undoStack.push(snapshot(m));
     if (m.undoStack.length > 300) m.undoStack.shift();
@@ -76,7 +79,7 @@ const Engine = (() => {
       a: m.scoreA,
       b: m.scoreB,
     };
-    if (err) entry.err = err;
+    if (kind) entry.kind = kind;
     m.log.push(entry);
 
     const events = [];

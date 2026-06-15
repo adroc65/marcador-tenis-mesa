@@ -71,14 +71,20 @@ button.ghost {
 }
 .pscore { font-size: min(36vh, 24vw); font-weight: 800; line-height: 1; }
 .half:active .pscore { transform: scale(1.05); transition: transform 0.05s; }
-.errbtns { display: flex; gap: 14px; margin-top: 1vmin; }
-.errbtns button {
-  background: rgba(15, 26, 46, 0.6); border: 1px solid var(--line);
-  border-radius: 10px; color: var(--muted); cursor: pointer;
-  font-size: clamp(13px, 2.2vmin, 18px); font-weight: 700;
-  padding: 6px 16px; min-width: 56px;
+.playbtns {
+  display: flex; gap: 8px; margin-top: 1vmin;
+  flex-wrap: wrap; justify-content: center;
 }
-.errbtns button:active { background: #3d1320; color: var(--text); }
+.playbtns button {
+  background: rgba(15, 26, 46, 0.6); border: 1px solid var(--line);
+  border-radius: 10px; cursor: pointer;
+  font-size: clamp(12px, 2vmin, 17px); font-weight: 700;
+  padding: 6px 12px; min-width: 48px;
+}
+.playbtns .win { color: #5fd98a; border-color: #1e5e3a; }
+.playbtns .win:active { background: #133021; color: #fff; }
+.playbtns .err { color: #f0808f; border-color: #5e1e2a; }
+.playbtns .err:active { background: #3d1320; color: #fff; }
 
 #center {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);

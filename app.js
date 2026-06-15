@@ -99,15 +99,22 @@ function tap(el) {
   render();
 }
 
-// Botones −S / −A: el jugador de ese lado PIERDE el punto por fallo
-// de saque o de ataque; el punto se le suma al rival y queda en el log.
-document.querySelectorAll('.errbtns button').forEach(b => {
+// Botones de jugada bajo cada jugador:
+//   S+ / A+  → ese jugador GANA el punto (ace o ataque ganador)
+//   −S / −A  → ese jugador PIERDE el punto (falló su saque o su ataque),
+//              el punto se le suma al rival.
+// En todos los casos la jugada queda registrada en el log y el JSON.
+document.querySelectorAll('.playbtns button').forEach(b => {
   b.addEventListener('click', ev => {
     ev.stopPropagation();
     if (!match || match.finished || match.betweenSets) return;
-    const p = b.closest('.half').dataset.player; // quien falló
-    const err = b.classList.contains('errS') ? 'S' : 'A';
-    const evs = Engine.addPoint(match, Engine.other(p), err);
+    const p = b.closest('.half').dataset.player;
+    let who, kind;
+    if (b.classList.contains('winS'))      { who = p;             kind = 'ace'; }
+    else if (b.classList.contains('winA')) { who = p;             kind = 'winner'; }
+    else if (b.classList.contains('errS')) { who = Engine.other(p); kind = 'serveErr'; }
+    else                                   { who = Engine.other(p); kind = 'attackErr'; }
+    const evs = Engine.addPoint(match, who, kind);
     evs.forEach(e => { if (e.type === 'swap') showBanner('🔄 Cambio de lado'); });
     render();
   });
@@ -237,6 +244,21 @@ function toSetup() {
   location.reload();
 }
 
+// Describe la jugada de un punto del log de forma uniforme.
+// Soporta el formato viejo (e.err = 'S'/'A') por compatibilidad.
+// actor = el jugador que ejecutó la jugada característica.
+function pointPlay(e) {
+  const k = e.kind || (e.err === 'S' ? 'serveErr' : e.err === 'A' ? 'attackErr' : null);
+  if (!k) return null;
+  const defs = {
+    ace:       { short: 'S+', actor: e.who,               phrase: 'ace de',             json: 'ace' },
+    winner:    { short: 'A+', actor: e.who,               phrase: 'ataque ganador de',  json: 'ataque' },
+    serveErr:  { short: '−S', actor: Engine.other(e.who), phrase: 'saque fallado por',  json: 'error_saque' },
+    attackErr: { short: '−A', actor: Engine.other(e.who), phrase: 'ataque fallado por', json: 'error_ataque' },
+  };
+  return Object.assign({ kind: k }, defs[k]);
+}
+
 function openLog() {
   const wrap = $('#logList');
   wrap.innerHTML = '';
@@ -252,7 +274,8 @@ function openLog() {
     }
     const r = document.createElement('div');
     r.className = 'logrow';
-    const extra = e.err ? ` · −${e.err} ${esc(name(Engine.other(e.who)))}` : '';
+    const p = pointPlay(e);
+    const extra = p ? ` · ${p.short} ${esc(name(p.actor))}` : '';
     r.innerHTML = `<span class="tm">${fmtTime(e.t)}</span>` +
       `<b>${esc(name(e.who))}</b>` +
       `<span>${e.a}–${e.b}</span>` +
@@ -293,7 +316,8 @@ function buildLogText(m) {
         ? `SET ${curSet} — ${fin.a}-${fin.b}, ${Math.max(1, Math.round(fin.ms / 60000))} min`
         : `SET ${curSet} — en curso`);
     }
-    const extra = e.err ? ` [${e.err === 'S' ? 'saque' : 'ataque'} fallado por ${name(Engine.other(e.who))}]` : '';
+    const p = pointPlay(e);
+    const extra = p ? ` [${p.phrase} ${name(p.actor)}]` : '';
     L.push(`${fmtTime(e.t)}  ${e.a}-${e.b}  punto para ${name(e.who)} (sacaba ${name(e.server)})${extra}`);
   });
   return L.join('\r\n');
@@ -305,7 +329,7 @@ function buildLogJson(m) {
   const iso = t => new Date(t).toISOString();
   return JSON.stringify({
     app: 'marcador-tenis-mesa',
-    version: 1,
+    version: 2,
     inicio: iso(m.matchStart),
     jugadores: { A: m.config.nameA, B: m.config.nameB },
     formato: {
@@ -320,11 +344,15 @@ function buildLogJson(m) {
       duracionSeg: Math.round(s.ms / 1000),
     })),
     setActual: m.finished ? null : { A: m.scoreA, B: m.scoreB },
-    puntos: m.log.map(e => ({
-      hora: iso(e.t), set: e.set, punto: e.who, sacaba: e.server,
-      A: e.a, B: e.b,
-      error: e.err === 'S' ? 'saque' : e.err === 'A' ? 'ataque' : null,
-    })),
+    puntos: m.log.map(e => {
+      const p = pointPlay(e);
+      return {
+        hora: iso(e.t), set: e.set, punto: e.who, sacaba: e.server,
+        A: e.a, B: e.b,
+        jugada: p ? p.json : null,   // ace | ataque | error_saque | error_ataque
+        ejecuta: p ? p.actor : null, // jugador que hizo la jugada característica
+      };
+    }),
   }, null, 2);
 }
 
