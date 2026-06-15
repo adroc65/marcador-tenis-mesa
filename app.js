@@ -142,6 +142,10 @@ function paintHalf(el, p) {
   el.querySelector('.pscore').textContent = p === 'A' ? m.scoreA : m.scoreB;
   const serving = !m.finished && !m.betweenSets && Engine.currentServer(m) === p;
   el.querySelector('.serve').classList.toggle('hidden', !serving);
+  // Solo el sacador puede hacer un ace o fallar su saque: los botones
+  // S+ y −S solo se muestran del lado de quien tiene el saque.
+  el.querySelector('.winS').classList.toggle('hidden', !serving);
+  el.querySelector('.errS').classList.toggle('hidden', !serving);
 }
 
 function render() {
